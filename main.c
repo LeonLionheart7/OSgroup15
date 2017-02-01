@@ -12,37 +12,35 @@ typedef struct process
 #define true 1;
 #define false 0;
 
-int queRear = 0;
-int queIndex = 0;
-process *que;
+int queRear = 0; //rear index for que
+int queIndex = 0; //front index for que. use this or 0
+process *que; //que of processes
 
-void RoundRobin(int, int, process[]);
+void RoundRobin(int, int, int, process[]);
 void deque();
 
 void main()
 {
+    //test data
     process p1 = {0, 3, 5, "P1"};
     process p2 = {1, 0, 9, "P2"};
-    
-    process q[2];
-    que = q;
+    process p[2]; // set size
+    que = p; // set size of que
     
     process processes[] = { p1, p2 };
     //printf("%d", processes[1].id);
-    RoundRobin(15, 2, processes);
+    RoundRobin(15, 2, 2, processes);
     
 }
 
-void RoundRobin(int runTill, int num_process, process processes[])
+//RoundRobin implementation
+void RoundRobin(int runTill, int num_process, int quantum, process processes[])
 {
     
     int time = 0; //current time
     int i = 0; //index for num or processes
-    int quantum = 0;
-    int lowestBurst =0;
-    int currentProcess = 0; //current process
-    int numOfProcessesLoaded = 0;
-    process queue[num_process];
+    int q = 0; // quantum 
+
     //Loop till end of runTill
     while(time < runTill)
     {
@@ -53,57 +51,62 @@ void RoundRobin(int runTill, int num_process, process processes[])
             if(processes[i].arrivalTime == time)
             {
                 
-                //if there is no current process, assign this to be.
-                if(numOfProcessesLoaded == 0){
                     //Que it
                     que[queRear] = processes[i];
                     queRear++;
-                }
+                
                 printf("Time %d: %s arrived\n", time, processes[i].name);
                 processes[i].hasArrived = true;
             }     
         } 
         
+        //Is there anything in the que?
         if(queRear != 0){
             //this is the process where the processor Processes the Process
-            if(quantum != 0)
+            if(q != 0)
             {
+                //if there is something in the queue
                 if(queRear != 0){
-            
+                    //process the process aka burst time goes down
                     que[0].burstTime--;
-                    quantum--;
+                    q--;
                 }
                 if(que[0].burstTime == 0){
                     printf("Time %d: %s Finished\n", time, que[0].name);
-                    quantum = 0;
+                    q = 0;
                 }
             }
-            if(quantum == 0){
-                if(que[0].burstTime == 0){
-                    printf("Time %d: %s Finished\n", time, que[0].name);
-                }
-            
-                quantum = 2;
+            if(q == 0){
+
+                q = quantum; // reset the quantum
+                
+                //if more is need que it again
                 if(que[0].burstTime > 0){
                     que[queRear] = que[0];
-                    //printf("Time %d: %s selected (%d)\n", time, que[0].name, que[0].burstTime);
                     queRear++;
                 }
-                deque();
+                
+                deque(); // deque current process
+                
+                //Are we idling now?
                 if(queRear ==0){
                     printf("Time %d idle\n",time);
-                }else
+                }else //nope
                 printf("Time %d: %s selected (%d)\n", time, que[0].name, que[0].burstTime);
 
             }
-        }else{
+        }else//nothing in the que
+        {
         printf("Time %d idle\n",time);
         }
-        time++;
+        
+        time++; //next time step
     }
-        printf("Finished at time %d\n", time);
+    //done
+    printf("Finished at time %d\n", time);
 }
 
+//simple deque
 void deque(){
     int i = 0;
     if(queRear == 0){
