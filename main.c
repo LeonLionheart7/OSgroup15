@@ -38,13 +38,13 @@ void RoundRobin(int runTill, int num_process, process processes[])
     
     int time = 0; //current time
     int i = 0; //index for num or processes
-    int quantum = 2;
+    int quantum = 0;
     int lowestBurst =0;
     int currentProcess = 0; //current process
     int numOfProcessesLoaded = 0;
     process queue[num_process];
     //Loop till end of runTill
-    while(time <= runTill)
+    while(time < runTill)
     {
         //loop through processes
         for(i = 0; i < num_process; i++){
@@ -64,34 +64,44 @@ void RoundRobin(int runTill, int num_process, process processes[])
             }     
         } 
         
-        //this is the process where the processor Processes the Process
-        if(quantum != 0)
-        {
-            if(queRear != 0){
-                
-                printf("Time %d: %s burst: %d\n", time, que[0].name, que[0].burstTime);
-                que[0].burstTime--;
-                quantum--;
+        if(queRear != 0){
+            //this is the process where the processor Processes the Process
+            if(quantum != 0)
+            {
+                if(queRear != 0){
+            
+                    que[0].burstTime--;
+                    quantum--;
+                }
+                if(que[0].burstTime == 0){
+                    printf("Time %d: %s Finished\n", time, que[0].name);
+                    quantum = 0;
+                }
             }
-            if(que[0].burstTime == 0){
-                printf("Time %d: %s Finished\n", time, que[0].name);
-            }
-        }
-        else{
-            if(que[0].burstTime == 0){
-                printf("Time %d: %s Finished\n", time, que[0].name);
-            }
-            quantum = 2;
-            if(que[0].burstTime >= 0){
-                que[queRear] = que[0];
-                queRear++;
-            }
-            deque();
+            if(quantum == 0){
+                if(que[0].burstTime == 0){
+                    printf("Time %d: %s Finished\n", time, que[0].name);
+                }
+            
+                quantum = 2;
+                if(que[0].burstTime > 0){
+                    que[queRear] = que[0];
+                    //printf("Time %d: %s selected (%d)\n", time, que[0].name, que[0].burstTime);
+                    queRear++;
+                }
+                deque();
+                if(queRear ==0){
+                    printf("Time %d idle\n",time);
+                }else
+                printf("Time %d: %s selected (%d)\n", time, que[0].name, que[0].burstTime);
 
+            }
+        }else{
+        printf("Time %d idle\n",time);
         }
         time++;
     }
-        
+        printf("Finished at time %d\n", time);
 }
 
 void deque(){
